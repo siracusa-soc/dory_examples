@@ -57,7 +57,9 @@ def create_dory_node(params):
     node.branch_last = 0
     node.branch_change = 0
 
-    name = 'BNRelu' if params['batchnorm'] else 'Relu'
+    # TODO add Relu as optional variable
+    assert params['use_relu'], "Layer without ReLU not implemented."
+    name = 'BNRelu' if params['batchnorm'] else 'Relu'  # TODO: check how to name it if there is no Relu with Alessio
     node.name = name
     node.op_type = name
     node.layout = 'CHW'
@@ -193,7 +195,7 @@ def create_weight(node):
     return torch.randint(low=low, high=high, size=size)
 
 
-def create_layer(i_layer, layer_node, dory_node, network_dir, hardware_target, input=None, weight=None, batchnorm_params=None):
+def create_layer(i_layer, layer_node, dory_node, network_dir, hardware_target, input=None, weight=None, batchnorm_params=None, use_relu=True):
 
     def save(a, filename):
         np.savetxt(os.path.join(network_dir, filename), a.permute(0, 2, 3, 1).flatten(), delimiter=',', fmt='%d')
@@ -204,7 +206,7 @@ def create_layer(i_layer, layer_node, dory_node, network_dir, hardware_target, i
 
     w = weight if weight is not None else create_weight(layer_node)
 
-    if 'ne16' in hardware_target:
+    if 'ne16' in hardware_target or 'neureka' in hardware_target:
         w_offset, _ = borders(layer_node.weight_bits, signed=True)
     else:
         w_offset = 0
@@ -248,6 +250,9 @@ def create_layer(i_layer, layer_node, dory_node, network_dir, hardware_target, i
     }
     y = y >> dory_node.outshift['value']
     y = clip(y, dory_node.output_activation_bits, y_signed)
+
+    if use_relu:
+        y[y < 0] = 0
 
     save(y, f'out_layer{i_layer}.txt')
 
