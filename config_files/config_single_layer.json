@@ -4,10 +4,10 @@
   "BNRelu_bits": 32,
   "onnx_file": "../examples/layer_test/nonexistent.onnx",
   "code reserved space": 152000,
-  "input_channels": 2,
-  "output_channels": 2,
+  "input_channels": 64,
+  "output_channels": 32,
   "kernel_shape": [1, 1],
-  "input_dimensions": [5, 5],
+  "input_dimensions": [32, 32],
   "input_bits": 8,
   "input_type": "int",
   "output_bits": 8,
@@ -18,5 +18,6 @@
   "weight_bits": 8,
   "intermediate_bits": 32,
   "use_relu": true,
+  "use_wmem": false,
   "batchnorm": true
 }
